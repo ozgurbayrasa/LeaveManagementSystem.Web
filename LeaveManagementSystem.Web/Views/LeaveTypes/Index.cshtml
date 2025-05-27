@@ -1,4 +1,5 @@
-﻿@model IEnumerable<LeaveManagementSystem.Web.Data.LeaveType>
+﻿<!-- This index view will get Leave Type IEnumearable -->
+@model IEnumerable<LeaveManagementSystem.Web.Data.LeaveType>
 
 @{
     ViewData["Title"] = "Index";
@@ -24,6 +25,7 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
+            <!-- Display For generates specific view according to data type (Boolean => CheckBox) -->
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>

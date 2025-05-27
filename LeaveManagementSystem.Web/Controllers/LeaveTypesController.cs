@@ -22,17 +22,21 @@ namespace LeaveManagementSystem.Web.Controllers
         // GET: LeaveTypes
         public async Task<IActionResult> Index()
         {
+            // Convertin db records into C# objects and returning them to the view.
             return View(await _context.LeaveTypes.ToListAsync());
         }
 
         // GET: LeaveTypes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            // Since id is nullable, we need to check if it has a value before proceeding.
             if (id == null)
             {
                 return NotFound();
             }
 
+            // Get the leave type by id from the database.
+            // Parameterizaiton helps to prevent SQL injection attacks.
             var leaveType = await _context.LeaveTypes
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (leaveType == null)
@@ -53,7 +57,7 @@ namespace LeaveManagementSystem.Web.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken] // This attribute helps to prevent CSRF attacks.
         public async Task<IActionResult> Create([Bind("Id,Name,NumberOfDays")] LeaveType leaveType)
         {
             if (ModelState.IsValid)
@@ -73,6 +77,7 @@ namespace LeaveManagementSystem.Web.Controllers
                 return NotFound();
             }
 
+            // Find any record in the database that matches the given id.
             var leaveType = await _context.LeaveTypes.FindAsync(id);
             if (leaveType == null)
             {
@@ -100,12 +105,16 @@ namespace LeaveManagementSystem.Web.Controllers
                     _context.Update(leaveType);
                     await _context.SaveChangesAsync();
                 }
+                // If two person accesses the same record at the same time,
+                // one of them will get a concurrency exception.
                 catch (DbUpdateConcurrencyException)
                 {
+                    // If the record with the given id does not exist, return NotFound.
                     if (!LeaveTypeExists(leaveType.Id))
                     {
                         return NotFound();
                     }
+                    // If the record exists, we can log the error or handle it accordingly.
                     else
                     {
                         throw;
@@ -133,6 +142,12 @@ namespace LeaveManagementSystem.Web.Controllers
 
             return View(leaveType);
         }
+
+        // Action name is specified because this method name can't be Delete.
+        // We also have Delete method with the same name and same parameter type.
+        // So, we need to specify a different action name for this method.
+
+        // Method name and action name can be different.
 
         // POST: LeaveTypes/Delete/5
         [HttpPost, ActionName("Delete")]
