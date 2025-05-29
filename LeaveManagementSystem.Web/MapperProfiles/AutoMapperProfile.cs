@@ -10,8 +10,13 @@ namespace LeaveManagementSystem.Web.MapperProfiles
         {
             // Automapper cannot automatically map properties with different names,
             // so we need to specify the mapping explicitly.
-            CreateMap<LeaveType, IndexVM>()
+            CreateMap<LeaveType, LeaveTypeReadOnlyVM>()
                 .ForMember(dest => dest.Days, opt => opt.MapFrom(src => src.NumberOfDays));
+
+            // Mapping from LeaveTypeCreateVM to LeaveType.
+            // Form data will be sent as LeaveType to the database.
+            CreateMap<LeaveTypeCreateVM, LeaveType>();
+                
         }
     }
 }

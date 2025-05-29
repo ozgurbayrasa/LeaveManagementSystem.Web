@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using LeaveManagementSystem.Web.Data;
 using LeaveManagementSystem.Web.Models.LeaveTypes;
 using AutoMapper;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LeaveManagementSystem.Web.Controllers
 {
@@ -33,7 +34,7 @@ namespace LeaveManagementSystem.Web.Controllers
 
 
             // Convert data model to view model using AutoMapper.
-            var viewData = _mapper.Map<List<IndexVM>>(data);
+            var viewData = _mapper.Map<List<LeaveTypeReadOnlyVM>>(data);
 
 
             return View(viewData);
@@ -52,12 +53,15 @@ namespace LeaveManagementSystem.Web.Controllers
             // Parameterizaiton helps to prevent SQL injection attacks.
             var leaveType = await _context.LeaveTypes
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (leaveType == null)
             {
                 return NotFound();
             }
 
-            return View(leaveType);
+            var viewData = _mapper.Map<LeaveTypeReadOnlyVM>(leaveType);
+
+            return View(viewData);
         }
 
         // GET: LeaveTypes/Create
@@ -71,15 +75,18 @@ namespace LeaveManagementSystem.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken] // This attribute helps to prevent CSRF attacks.
-        public async Task<IActionResult> Create([Bind("Id,Name,NumberOfDays")] LeaveType leaveType)
+
+        // Binding might be dangerous for overposting attacks.
+        public async Task<IActionResult> Create(LeaveTypeCreateVM leaveTypeCreate)
         {
             if (ModelState.IsValid)
             {
+                var leaveType = _mapper.Map<LeaveType>(leaveTypeCreate);
                 _context.Add(leaveType);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(leaveType);
+            return View(leaveTypeCreate);
         }
 
         // GET: LeaveTypes/Edit/5
