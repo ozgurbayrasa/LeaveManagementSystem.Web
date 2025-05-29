@@ -1,5 +1,6 @@
 using System.Reflection;
 using LeaveManagementSystem.Web.Data;
+using LeaveManagementSystem.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+// This service is registered to handle the business logic for leave types.
+builder.Services.AddScoped<ILeaveTypesService, LeaveTypesService>();
 
 // Add AutoMapper to the service collection.
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
