@@ -16,7 +16,10 @@ namespace LeaveManagementSystem.Web.MapperProfiles
             // Mapping from LeaveTypeCreateVM to LeaveType.
             // Form data will be sent as LeaveType to the database.
             CreateMap<LeaveTypeCreateVM, LeaveType>();
-                
+
+            // I need to map for both ways. We need to use Reverse Map as well.
+            CreateMap<LeaveTypeEditVM, LeaveType>().ReverseMap();
+
         }
     }
 }

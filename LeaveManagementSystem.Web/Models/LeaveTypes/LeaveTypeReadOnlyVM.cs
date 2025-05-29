@@ -1,13 +1,14 @@
-﻿using Microsoft.Identity.Client;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.Identity.Client;
 
 namespace LeaveManagementSystem.Web.Models.LeaveTypes
 {
-    public class LeaveTypeReadOnlyVM
+    public class LeaveTypeReadOnlyVM : BaseLeaveTypeVm
     {
-        public int Id { get; set; }
 
         public string Name { get; set; } = string.Empty;
 
+        [Display(Name = "Maximum Allocation of Days")]
         public int Days { get; set; }
     }
 

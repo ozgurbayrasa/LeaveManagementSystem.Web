@@ -2,17 +2,17 @@
 
 namespace LeaveManagementSystem.Web.Models.LeaveTypes
 {
-    // I don't need id in creating a new leave type.
-    // It will be defined by the database.
-    public class LeaveTypeCreateVM
+    public class LeaveTypeEditVM : BaseLeaveTypeVm
     {
+
         [Required]
-        [Length(4, 150, ErrorMessage="You have violated langth requirements")]
+        [Length(4, 150, ErrorMessage = "You have violated langth requirements")]
         public string Name { get; set; } = string.Empty;
 
         [Required]
-        [Range(1,90)]
+        [Range(1, 90)]
         [Display(Name = "Maximum Allocation of Days")]
+
         public int NumberOfDays { get; set; }
     }
 }
