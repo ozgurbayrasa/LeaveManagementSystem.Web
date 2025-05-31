@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using LeaveManagementSystem.Web.Data;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace LeaveManagementSystem.Web.Areas.Identity.Pages.Account
@@ -27,6 +28,7 @@ namespace LeaveManagementSystem.Web.Areas.Identity.Pages.Account
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
@@ -37,6 +39,7 @@ namespace LeaveManagementSystem.Web.Areas.Identity.Pages.Account
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
+            RoleManager<IdentityRole> roleManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
@@ -44,6 +47,7 @@ namespace LeaveManagementSystem.Web.Areas.Identity.Pages.Account
             _userStore = userStore;
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _logger = logger;
             _emailSender = emailSender;
         }
@@ -53,7 +57,10 @@ namespace LeaveManagementSystem.Web.Areas.Identity.Pages.Account
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [BindProperty]
-        public InputModel Input { get; set; }
+        public InputModel Input { get; set; } = new InputModel();
+
+        // Role Names doesn't need to be an form property, as it is not submitted by the form.
+        public string[] RoleNames { get; set; }
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -118,6 +125,10 @@ namespace LeaveManagementSystem.Web.Areas.Identity.Pages.Account
             [Display(Name = "Date of Birth")]
             public DateOnly DateOfBirth { get; set; }
 
+            [Required]
+            public string RoleName { get; set; } 
+
+
         }
 
 
@@ -125,12 +136,28 @@ namespace LeaveManagementSystem.Web.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            // Input model roles initialization
+            var roles = await _roleManager.Roles
+                .Select(r => r.Name)
+                .Where(r => r != "Administrator")
+                .ToArrayAsync();
+            RoleNames = roles;
+
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            // Input model roles initialization
+            var roles = await _roleManager.Roles
+                .Select(r => r.Name)
+                .Where(r => r != "Administrator")
+                .ToArrayAsync();
+            RoleNames = roles;
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
@@ -148,6 +175,15 @@ namespace LeaveManagementSystem.Web.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+                    
+                    if(Input.RoleName == "Supervisor")
+                    {
+                        await _userManager.AddToRolesAsync(user, ["Employee", "Supervisor"]);
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, "Employee");
+                    }
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -178,7 +214,7 @@ namespace LeaveManagementSystem.Web.Areas.Identity.Pages.Account
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-
+            
             // If we got this far, something failed, redisplay form
             return Page();
         }
