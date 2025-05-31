@@ -17,8 +17,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// This service is registered to handle the business logic for leave types.
+// This service is registered as a scoped service, meaning a new instance is created for each HTTP request.
 builder.Services.AddScoped<ILeaveTypesService, LeaveTypesService>();
+
+// This service is registered as a transient service, so a new instance is created each time it is requested.
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 // Add AutoMapper to the service collection.
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
