@@ -68,5 +68,9 @@ namespace LeaveManagementSystem.Web.Data
         // LeaveTypes is the name of the table that will be created in the database.
         // EF Core will automatically create a table named "LeaveTypes" based on this DbSet.
         public DbSet<LeaveType> LeaveTypes { get; set; }
+
+        public DbSet<LeaveAllocation> LeaveAllocations { get; set; }
+
+        public DbSet<Period> Periods { get; set; }
     }
 }
